@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 
-See the technical note "Liquidity Math in Uniswap v3" and Uniswap v3 whitepaper
+See the technical note "Liquidity Math in Uniswap v3" and the Uniswap v3 whitepaper
 for the description of the purpose of this code.
 
 """
