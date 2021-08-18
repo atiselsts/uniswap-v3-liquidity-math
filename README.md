@@ -1,12 +1,12 @@
 # Overview
 
-See the technical note "Liquidity Math in Uniswap v3" and the [Uniswap v3 whitepaper](https://uniswap.org/whitepaper-v3.pdf) for the description of the purpose of this code.
+See the technical note [Liquidity Math in Uniswap v3](http://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf) and the [Uniswap v3 whitepaper](https://uniswap.org/whitepaper-v3.pdf) for the description of the purpose of this code.
 
 ## Contents
 
-* `uniswap-v3-liquidity-math.py` - implmentations of the equations and examples fromn the "Liquidity Math in Uniswap v3" paper
-* `subgraph-liquidity-query-example.py` - shows the amounts locked in the current tick of the USDC/WETH 0.3% pool
-* `subgraph-liquidity-range-example.py` - shows the amounts locked in all ticks with nonzero liquidity delta in the USDC/WETH 0.3% pool
+* [`uniswap-v3-liquidity-math.py`](uniswap-v3-liquidity-math.py) - implementation of the equations and examples from the "Liquidity Math in Uniswap v3" paper
+* [`subgraph-liquidity-query-example.py`](subgraph-liquidity-query-example.py) - query the Uniswap v3 subgraph information to show the amounts locked in the current tick range of the USDC/WETH 0.3% pool
+* [`subgraph-liquidity-range-example.py`](subgraph-liquidity-range-example.py) - shows the amounts locked in all ticks with nonzero `liquidityNet`, in the USDC/WETH 0.3% pool
 
 ## Example outputs
 
