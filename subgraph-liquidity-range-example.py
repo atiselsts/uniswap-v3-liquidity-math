@@ -151,7 +151,6 @@ while tick <= max_tick:
 
     else:
         # Only asset0 locked
-        amount0 = liquidity * (sb - sa) / (sa * sb)
         adjusted_amount0 = amount0 / 10 ** decimals0
         print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount0, token0, adjusted_amount1, token1))
 
