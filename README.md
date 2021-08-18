@@ -12,6 +12,7 @@ See the technical note "Liquidity Math in Uniswap v3" and the [Uniswap v3 whitep
 
 ### Example output of `uniswap-v3-liquidity-math.py`
 
+```
 Example 1: how much of USDC I need when providing 2 ETH at this price and range?
 amount of USDC y=5076.10
 p_a=1500.00 (75.00% of P), p_b=2500.00 (125.00% of P)
@@ -23,18 +24,20 @@ Example 3: Using the position created in Example 2, what are asset balances at 2
 Amount of ETH x=0.85 amount of USDC y=6572.89
 delta_x=-1.15 delta_y=2572.89
 Amount of ETH x=0.85 amount of USDC y=6572.89
-
+```
 
 ### Example output of `subgraph-liquidity-query-example.py`
 
+```
 L=22510401004259913887
 tick=195879
 Current price: 0.000321 WETH for 1 USDC (3115.361406 USDC for 1 WETH)
 Amounts at the current tick: 3770791.99 USDC or 1209.30 WETH
-
+```
 
 ### Example output of `subgraph-liquidity-range-example.py`
 
+```
 ...
 tick=195660 price=3184.336897 USDC for WETH
         1193.68 WETH locked (potentially worth 3789699.28 USDC)
@@ -55,3 +58,4 @@ tick=196020 price=3071.745208 USDC for WETH
 tick=196080 price=3053.370833 USDC for WETH
         3740185.70 USDC locked (potentially worth 1228.62 WETH)
 ...
+```
