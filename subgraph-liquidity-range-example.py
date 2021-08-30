@@ -9,7 +9,6 @@ from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
 POOL_ID = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-POOL_ID = "0x5ab53ee1d50eef2c1dd3d5402789cd27bb52c1bb"
 
 TICK_BASE = 1.0001
 
@@ -136,9 +135,9 @@ while tick < max_tick:
 
     if tick < current_range_bottom_tick:
         # Only asset1 locked
+        total_amount1 += adjusted_amount1
         if should_print_tick:
             print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount1, token1, adjusted_amount0, token0))
-        total_amount1 += adjusted_amount1
 
     elif tick == current_range_bottom_tick:
         # Always print the current tick. It normally has both assets locked
@@ -164,9 +163,9 @@ while tick < max_tick:
 
     else:
         # Only asset0 locked
+        total_amount0 += adjusted_amount0
         if should_print_tick:
             print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount0, token0, adjusted_amount1, token1))
-        total_amount0 += adjusted_amount0
 
     tick += tick_spacing
 
