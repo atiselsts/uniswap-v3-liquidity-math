@@ -105,7 +105,7 @@ current_range_bottom_tick = current_tick // tick_spacing * tick_spacing
 
 # Sum up all tokens in the pool
 total_amount0 = 0
-total_amount1 = 1
+total_amount1 = 0
 
 # Iterate over the tick map starting from the bottom
 tick = min_tick
