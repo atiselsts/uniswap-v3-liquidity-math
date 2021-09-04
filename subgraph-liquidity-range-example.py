@@ -103,71 +103,101 @@ max_tick = max(tick_mapping.keys())
 
 current_range_bottom_tick = current_tick // tick_spacing * tick_spacing
 
+current_price = tick_to_price(current_tick)
+adjusted_current_price = current_price / (10 ** (decimals1 - decimals0))
+
 # Sum up all tokens in the pool
 total_amount0 = 0
 total_amount1 = 0
 
+
+# Guess the preferred way to display the price;
+# try to print most assets in terms of USD;
+# if that fails, try to use the price value that's above 1.0 when adjusted for decimals.
+stablecoins = ["USDC", "DAI", "USDT", "TUSD", "LUSD", "BUSD", "GUSD", "UST"]
+if token0 in stablecoins and token1 not in stablecoins:
+    invert_price = True
+elif adjusted_current_price < 1.0:
+    invert_price = True
+else:
+    invert_price = False
+
 # Iterate over the tick map starting from the bottom
 tick = min_tick
-while tick < max_tick:
+while tick <= max_tick:
     liquidity_delta = tick_mapping.get(tick, 0)
     liquidity += liquidity_delta
 
-    should_print_tick = PRINT_ALL_TICKS or liquidity_delta != 0
+    price = tick_to_price(tick)
+    adjusted_price = price / (10 ** (decimals1 - decimals0))
+    if invert_price:
+        adjusted_price = 1 / adjusted_price
+        tokens = "{} for {}".format(token0, token1)
+    else:
+        tokens = "{} for {}".format(token1, token0)
+
+    should_print_tick = PRINT_ALL_TICKS or liquidity_delta != 0 or tick == current_range_bottom_tick
+    if should_print_tick:
+        print("tick={} price={:.6f} {}".format(tick, adjusted_price, tokens))
 
     # Compute square roots of prices corresponding to the bottom and top ticks
     bottom_tick = tick
-    top_tick = tick + tick_spacing
+    top_tick = bottom_tick + tick_spacing
     sa = tick_to_price(bottom_tick // 2)
     sb = tick_to_price(top_tick // 2)
 
-    price = tick_to_price(tick)
-    adjusted_price = price / (10 ** (decimals1 - decimals0))
-    if should_print_tick:
-        print("tick={} price={:.6f} {} for {}".format(tick, 1 / adjusted_price, token0, token1))
-
-    # Compute the real amounts of both tokens potentially present in the range
-    amount0 = liquidity * (sb - sa) / (sa * sb)
-    amount1 = liquidity * (sb - sa)
-
-    adjusted_amount0 = amount0 / (10 ** decimals0)
-    adjusted_amount1 = amount1 / (10 ** decimals1)
-
     if tick < current_range_bottom_tick:
-        # Only asset1 locked
-        total_amount1 += adjusted_amount1
+        # Compute the amounts of tokens potentially in the range
+        amount1 = liquidity * (sb - sa)
+        amount0 = amount1 / (sb * sa)
+
+        # Only token1 locked
+        total_amount1 += amount1
+
         if should_print_tick:
+            adjusted_amount0 = amount0 / (10 ** decimals0)
+            adjusted_amount1 = amount1 / (10 ** decimals1)
             print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount1, token1, adjusted_amount0, token0))
 
     elif tick == current_range_bottom_tick:
         # Always print the current tick. It normally has both assets locked
         print("        Current tick, both assets present!")
+        print("        Current price={:.6f} {}".format(1 / adjusted_current_price if invert_price else adjusted_current_price, tokens))
 
-        # 1. Print the real amounts of the two assets needed to be swapped to move out of the current tick range
+        # Print the real amounts of the two assets needed to be swapped to move out of the current tick range
         current_sqrt_price = tick_to_price(current_tick / 2)
         amount0actual = liquidity * (sb - current_sqrt_price) / (current_sqrt_price * sb)
         amount1actual = liquidity * (current_sqrt_price - sa)
-        adjusted_amount0actual = amount0actual / 10 ** decimals0
-        adjusted_amount1actual = amount1actual / 10 ** decimals1
+        adjusted_amount0actual = amount0actual / (10 ** decimals0)
+        adjusted_amount1actual = amount1actual / (10 ** decimals1)
 
-        total_amount0 += adjusted_amount0actual
-        total_amount1 += adjusted_amount1actual
+        total_amount0 += amount0actual
+        total_amount1 += amount1actual
 
         print("        {:.2f} {} and {:.2f} {} remaining in the current tick range".format(
             adjusted_amount0actual, token0, adjusted_amount1actual, token1))
 
-        # 2. Print the amounts of the two assets that would be locked if the tick was only asset0 or asset1
-        print("        potentially {:.2f} {} or {:.2f} {} in total in the current tick range".format(
-            adjusted_amount0, token0, adjusted_amount1, token1))
-
 
     else:
-        # Only asset0 locked
-        total_amount0 += adjusted_amount0
+        # Move the current tick range - we alread covered the token0 of the [price_current, price_b] range when printing the current price range
+        bottom_tick = tick + tick_spacing
+        top_tick = bottom_tick + tick_spacing
+        sa = tick_to_price(bottom_tick // 2)
+        sb = tick_to_price(top_tick // 2)
+
+        # Compute the amounts of tokens potentially in the range
+        amount1 = liquidity * (sb - sa)
+        amount0 = amount1 / (sb * sa)
+
+        # Only token0 locked
+        total_amount0 += amount0
+
         if should_print_tick:
+            adjusted_amount0 = amount0 / (10 ** decimals0)
+            adjusted_amount1 = amount1 / (10 ** decimals1)
             print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount0, token0, adjusted_amount1, token1))
 
     tick += tick_spacing
 
 print("In total: {:.2f} {} and {:.2f} {}".format(
-      total_amount0, token0, total_amount1, token1))
+      total_amount0 / 10 ** decimals0, token0, total_amount1 / 10 ** decimals1, token1))
