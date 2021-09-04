@@ -150,8 +150,8 @@ while tick < max_tick:
         adjusted_amount0actual = amount0actual / 10 ** decimals0
         adjusted_amount1actual = amount1actual / 10 ** decimals1
 
-        total_amount0 += adjusted_amount0
-        total_amount1 += adjusted_amount1
+        total_amount0 += adjusted_amount0actual
+        total_amount1 += adjusted_amount1actual
 
         print("        {:.2f} {} and {:.2f} {} remaining in the current tick range".format(
             adjusted_amount0actual, token0, adjusted_amount1actual, token1))
