@@ -16,8 +16,8 @@ URL = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
 TICK_BASE = 1.0001
 
 # GraphQL query to get the pool information
-query = """query pools {
-  pools (where: {id: "%POOL_ID"}){
+query = """query pools($pool_id: ID!) {
+  pools (where: {id: $pool_id}) {
     tick
     liquidity
     feeTier
@@ -48,7 +48,7 @@ def fee_tier_to_tick_spacing(fee_tier):
 # Query the subgraph
 req = urllib.request.Request(URL)
 req.add_header('Content-Type', 'application/json; charset=utf-8')
-jsondata = {"query" : query.replace("%POOL_ID", POOL_ID)}
+jsondata = {"query": query, "variables": {"pool_id": POOL_ID}}
 jsondataasbytes = json.dumps(jsondata).encode('utf-8')
 req.add_header('Content-Length', len(jsondataasbytes))
 response = urllib.request.urlopen(req, jsondataasbytes)
