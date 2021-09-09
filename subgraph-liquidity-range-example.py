@@ -7,19 +7,14 @@
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+import math
 
 POOL_ID = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
 
 TICK_BASE = 1.0001
 
-# If set to true, all tick in the pool's liquidity range are printed.
-# Otherwise, only ticks with nonzero liquidityNet are printed.
-# Nonzero liquidityNet means that the amount of liquidity changes on the tick boundary.
-# Setting this to false will make the output shorter, especially for pools with huge liquidity ranges.
-PRINT_ALL_TICKS = False
-
-pool_query = """query {
-  pools (where: {id: "%POOL_ID"}){
+pool_query = """query get_pools($pool_id: ID!) {
+  pools(where: {id: $pool_id}) {
     tick
     sqrtPrice
     liquidity
@@ -35,8 +30,8 @@ pool_query = """query {
   }
 }"""
 
-tick_query = """query {
-  ticks(skip:%NUM_SKIP, where:{pool:"%POOL_ID"}) {
+tick_query = """query get_ticks($num_skip: Int, $pool_id: ID!) {
+  ticks(skip: $num_skip, where: {pool: $pool_id}) {
     tickIdx
     liquidityNet
   }
@@ -64,8 +59,12 @@ client = Client(
 
 # get pool info
 try:
-    response = client.execute(gql(
-        pool_query.replace("%POOL_ID", POOL_ID)))
+    variables = {"pool_id": POOL_ID}
+    response = client.execute(gql(pool_query), variable_values=variables)
+
+    if len(response['pools']) == 0:
+        print("pool not found")
+        exit(-1)
 
     pool = response['pools'][0]
     current_tick = int(pool["tick"])
@@ -76,22 +75,25 @@ try:
     decimals0 = int(pool["token0"]["decimals"])
     decimals1 = int(pool["token1"]["decimals"])
 except Exception as ex:
-    print("got exception", ex)
+    print("got exception while querying pool data:", ex)
+    exit(-1)
 
 # get tick info
 tick_mapping = {}
 num_skip = 0
 try:
     while True:
-        response = client.execute(gql(
-            tick_query.replace("%NUM_SKIP", str(num_skip)).replace("%POOL_ID", POOL_ID)))
+        variables = {"num_skip": num_skip, "pool_id": POOL_ID}
+        response = client.execute(gql(tick_query), variable_values=variables)
+
         if len(response["ticks"]) == 0:
             break
         num_skip += len(response["ticks"])
         for item in response["ticks"]:
             tick_mapping[int(item["tickIdx"])] = int(item["liquidityNet"])
 except Exception as ex:
-    print(ex)
+    print("got exception while querying tick data:", ex)
+    exit(-1)
 
     
 # Start from zero; if we were iterating from the current tick, would start from the pool's total liquidity
@@ -101,7 +103,9 @@ liquidity = 0
 min_tick = min(tick_mapping.keys())
 max_tick = max(tick_mapping.keys())
 
-current_range_bottom_tick = current_tick // tick_spacing * tick_spacing
+# Compute the tick range. This code would work as well in Python: `current_tick // tick_spacing * tick_spacing`
+# However, using floor() is more portable.
+current_range_bottom_tick = math.floor(current_tick / tick_spacing) * tick_spacing
 
 current_price = tick_to_price(current_tick)
 adjusted_current_price = current_price / (10 ** (decimals1 - decimals0))
@@ -136,9 +140,9 @@ while tick <= max_tick:
     else:
         tokens = "{} for {}".format(token1, token0)
 
-    should_print_tick = PRINT_ALL_TICKS or liquidity_delta != 0 or tick == current_range_bottom_tick
+    should_print_tick = liquidity != 0
     if should_print_tick:
-        print("tick={} price={:.6f} {}".format(tick, adjusted_price, tokens))
+        print("ticks=[{}, {}], bottom tick price={:.6f} {}".format(tick, tick + tick_spacing, adjusted_price, tokens))
 
     # Compute square roots of prices corresponding to the bottom and top ticks
     bottom_tick = tick
@@ -157,7 +161,7 @@ while tick <= max_tick:
         if should_print_tick:
             adjusted_amount0 = amount0 / (10 ** decimals0)
             adjusted_amount1 = amount1 / (10 ** decimals1)
-            print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount1, token1, adjusted_amount0, token0))
+            print("        {:.2f} {} locked, potentially worth {:.2f} {}".format(adjusted_amount1, token1, adjusted_amount0, token0))
 
     elif tick == current_range_bottom_tick:
         # Always print the current tick. It normally has both assets locked
@@ -195,7 +199,7 @@ while tick <= max_tick:
         if should_print_tick:
             adjusted_amount0 = amount0 / (10 ** decimals0)
             adjusted_amount1 = amount1 / (10 ** decimals1)
-            print("        {:.2f} {} locked (potentially worth {:.2f} {})".format(adjusted_amount0, token0, adjusted_amount1, token1))
+            print("        {:.2f} {} locked, potentially worth {:.2f} {}".format(adjusted_amount0, token0, adjusted_amount1, token1))
 
     tick += tick_spacing
 

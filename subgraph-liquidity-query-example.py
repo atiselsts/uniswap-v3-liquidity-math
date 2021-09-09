@@ -80,10 +80,11 @@ adjusted_price = price / (10 ** (decimals1 - decimals0))
 # Compute square roots of prices corresponding to the bottom and top ticks
 sa = tick_to_price(bottom_tick // 2)
 sb = tick_to_price(top_tick // 2)
+sp = price ** 0.5
 
 # Compute real amounts of the two assets
-amount0 = L * (sb - sa) / (sa * sb)
-amount1 = L * (sb - sa)
+amount0 = L * (sb - sp) / (sp * sb)
+amount1 = L * (sp - sa)
 
 # Adjust them to a human-readable format
 adjusted_amount0 = amount0 / 10 ** decimals0
@@ -92,5 +93,5 @@ adjusted_amount1 = amount1 / 10 ** decimals1
 print("Current price: {:.6f} {} for 1 {} ({:.6f} {} for 1 {})".format(
     adjusted_price, token1, token0, 1 / adjusted_price, token0, token1))
 
-print("Amounts at the current tick: {:.2f} {} or {:.2f} {}".format(
+print("Amounts at the current tick range: {:.2f} {} and {:.2f} {}".format(
     adjusted_amount0, token0, adjusted_amount1, token1))
