@@ -135,7 +135,7 @@ for tick_lower, tick_upper, liquidity in sorted(positions):
         total_amount0 += amount0
 
 
-print("In total: {:.2f} {} and {:.2f} {}".format(
+print("In total (including inactive positions): {:.2f} {} and {:.2f} {}".format(
       total_amount0 / 10 ** decimals0, token0, total_amount1 / 10 ** decimals1, token1))
 print("Total liquidity from active positions: {}, from pool: {} (should be equal)".format(
       active_positions_liquidity, pool_liquidity))
