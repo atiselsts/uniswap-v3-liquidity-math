@@ -14,11 +14,11 @@ See the technical note [Liquidity Math in Uniswap v3](http://atiselsts.github.io
 
 Some scripts need the `gql` Python module. Install this dependency with:
 
-   pip install -r requirements.txt
+    pip install -r requirements.txt
 
 Execute from the command line, for example with:
 
-   ./subgraph-liquidity-range-example.py
+    ./subgraph-liquidity-range-example.py
 
 ## Example outputs
 
