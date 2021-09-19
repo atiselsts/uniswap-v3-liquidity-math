@@ -9,6 +9,17 @@ See the technical note [Liquidity Math in Uniswap v3](http://atiselsts.github.io
 * [`subgraph-liquidity-range-example.py`](subgraph-liquidity-range-example.py) - shows the amounts locked in all ticks with nonzero `liquidityNet` in the USDC/WETH 0.3% pool
 * [`subgraph-liquidity-positions-example.py`](subgraph-liquidity-positions-example.py) - shows the amounts locked in all active positions in the USDC/WETH 0.3% pool
 
+## Installation and usage
+
+
+Some scripts need the `gql` Python module. Install this dependency with:
+
+   pip install -r requirements.txt
+
+Execute from the command line, for example with:
+
+   ./subgraph-liquidity-range-example.py
+
 ## Example outputs
 
 ### Example output of `uniswap-v3-liquidity-math.py`

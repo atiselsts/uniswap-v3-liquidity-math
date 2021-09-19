@@ -8,8 +8,14 @@
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 import math
+import sys
 
+# default pool id is the 0.3% USDC/ETH pool
 POOL_ID = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+
+# if passed in command line, use an alternative pool ID
+if len(sys.argv) > 1:
+    POOL_ID = sys.argv[1]
 
 TICK_BASE = 1.0001
 
@@ -83,6 +89,7 @@ tick_mapping = {}
 num_skip = 0
 try:
     while True:
+        print("Querying ticks, num_skip={}".format(num_skip))
         variables = {"num_skip": num_skip, "pool_id": POOL_ID}
         response = client.execute(gql(tick_query), variable_values=variables)
 

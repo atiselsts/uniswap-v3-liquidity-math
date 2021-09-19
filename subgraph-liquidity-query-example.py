@@ -8,9 +8,14 @@
 import json
 import urllib.request
 import math
+import sys
 
 # Look at the USDC/ETH 0.3% pool
 POOL_ID = '0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8'
+
+# if passed in command line, use an alternative pool ID
+if len(sys.argv) > 1:
+    POOL_ID = sys.argv[1]
 
 URL = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
 TICK_BASE = 1.0001

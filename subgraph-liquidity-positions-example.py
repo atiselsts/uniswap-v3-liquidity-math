@@ -8,8 +8,14 @@
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 import math
+import sys
 
+# default pool id is the 0.3% USDC/ETH pool
 POOL_ID = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+
+# if passed in command line, use an alternative pool ID
+if len(sys.argv) > 1:
+    POOL_ID = sys.argv[1]
 
 TICK_BASE = 1.0001
 
@@ -33,6 +39,7 @@ pool_query = """query get_pools($pool_id: ID!) {
 # return open positions only (with liquidity > 0)
 position_query = """query get_positions($num_skip: Int, $pool_id: ID!) {
   positions(skip: $num_skip, where: {pool: $pool_id, liquidity_gt: 0}) {
+    id
     tickLower { tickIdx }
     tickUpper { tickIdx }
     liquidity
@@ -87,7 +94,8 @@ try:
             tick_lower = int(item["tickLower"]["tickIdx"])
             tick_upper = int(item["tickUpper"]["tickIdx"])
             liquidity = int(item["liquidity"])
-            positions.append((tick_lower, tick_upper, liquidity))
+            id = int(item["id"])
+            positions.append((tick_lower, tick_upper, liquidity, id))
 except Exception as ex:
     print("got exception while querying position data:", ex)
     exit(-1)
@@ -105,7 +113,7 @@ total_amount0 = 0
 total_amount1 = 0
 
 # Print all active positions
-for tick_lower, tick_upper, liquidity in sorted(positions):
+for tick_lower, tick_upper, liquidity, id in sorted(positions):
 
     sa = tick_to_price(tick_lower / 2)
     sb = tick_to_price(tick_upper / 2)
@@ -126,8 +134,8 @@ for tick_lower, tick_upper, liquidity in sorted(positions):
         total_amount1 += amount1
         active_positions_liquidity += liquidity
 
-        print("  position in range [{},{}]: {:.2f} {} and {:.2f} {} at the current price".format(
-              tick_lower, tick_upper,
+        print("  position {: 7d} in range [{},{}]: {:.2f} {} and {:.2f} {} at the current price".format(
+              id, tick_lower, tick_upper,
               adjusted_amount0, token0, adjusted_amount1, token1))
     else:
         # Only token0 locked
