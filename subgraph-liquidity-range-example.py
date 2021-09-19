@@ -190,12 +190,6 @@ while tick <= max_tick:
 
 
     else:
-        # Move the current tick range - we alread covered the token0 of the [price_current, price_b] range when printing the current price range
-        bottom_tick = tick + tick_spacing
-        top_tick = bottom_tick + tick_spacing
-        sa = tick_to_price(bottom_tick // 2)
-        sb = tick_to_price(top_tick // 2)
-
         # Compute the amounts of tokens potentially in the range
         amount1 = liquidity * (sb - sa)
         amount0 = amount1 / (sb * sa)
