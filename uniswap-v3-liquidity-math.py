@@ -31,10 +31,14 @@ def get_liquidity(x, y, sp, sa, sb):
 #
 # Calculate x and y given liquidity and price range
 #
-def calculate_x(L, sp, sb):
+def calculate_x(L, sp, sa, sb):
+    # limit the square root of price to the range
+    sp = max(min(sp, sb), sa)
     return L * (sb - sp) / (sp * sb)
 
-def calculate_y(L, sp, sa):
+def calculate_y(L, sp, sa, sb):
+    # limit the square root of price to the range
+    sp = max(min(sp, sb), sa)
     return L * (sp - sa)
 
 
@@ -124,11 +128,11 @@ def test(x, y, p, a, b):
     print("d^2: {:.2f} vs {:.2f}, error {:.6f}%".format(d**2, id**2, error))
 
 
-    ix = calculate_x(L, sp, sb)
+    ix = calculate_x(L, sp, sa, sb)
     error = 100.0 * (1 - ix / x)
     print("x: {:.2f} vs {:.2f}, error {:.6f}%".format(x, ix, error))
 
-    iy = calculate_y(L, sp, sa)
+    iy = calculate_y(L, sp, sa, sb)
     error = 100.0 * (1 - iy / y)
     print("y: {:.2f} vs {:.2f}, error {:.6f}%".format(y, iy, error))
     print("")
@@ -170,7 +174,7 @@ def example_1():
     sa = a ** 0.5
     sb = b ** 0.5
     L = get_liquidity_0(x, sp, sb)
-    y = calculate_y(L, sp, sa)
+    y = calculate_y(L, sp, sa, sb)
     print("amount of USDC y={:.2f}".format(y))
 
     # demonstrate that with the calculated y value, the given range is correct
@@ -221,11 +225,18 @@ def example_3():
 
     P1 = 2500
     sp1 = P1 ** 0.5
-    x1 = calculate_x(L, sp1, sb)
-    y1 = calculate_y(L, sp1, sa)
+
+    x1 = calculate_x(L, sp1, sa, sb)
+    y1 = calculate_y(L, sp1, sa, sb)
     print("Amount of ETH x={:.2f} amount of USDC y={:.2f}".format(x1, y1))
 
     # alternative way, directly based on the whitepaper
+
+    # this delta math only works if the price is in the range (including at its endpoints),
+    # so limit the square roots of prices to the range first
+    sp = max(min(sp, sb), sa)
+    sp1 = max(min(sp1, sb), sa)
+
     delta_p = sp1 - sp
     delta_inv_p = 1/sp1 - 1/sp
     delta_x = delta_inv_p * L
