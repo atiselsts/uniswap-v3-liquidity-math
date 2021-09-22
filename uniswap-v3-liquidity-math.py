@@ -32,13 +32,11 @@ def get_liquidity(x, y, sp, sa, sb):
 # Calculate x and y given liquidity and price range
 #
 def calculate_x(L, sp, sa, sb):
-    # limit the square root of price to the range
-    sp = max(min(sp, sb), sa)
+    sp = max(min(sp, sb), sa)     # if the price is outside the range, use the range endpoints instead
     return L * (sb - sp) / (sp * sb)
 
 def calculate_y(L, sp, sa, sb):
-    # limit the square root of price to the range
-    sp = max(min(sp, sb), sa)
+    sp = max(min(sp, sb), sa)     # if the price is outside the range, use the range endpoints instead
     return L * (sp - sa)
 
 
