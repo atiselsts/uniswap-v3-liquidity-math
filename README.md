@@ -2,6 +2,8 @@
 
 See the technical note [Liquidity Math in Uniswap v3](http://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf) and the [Uniswap v3 whitepaper](https://uniswap.org/whitepaper-v3.pdf) for the description of the purpose of this code.
 
+Have questions? Feel free to contact me via email atis.elsts@gmail.com or DM (https://twitter.com/atiselsts, https://t.me/atiselsts). I'm also offering paid consultations on this topic.
+
 ## Contents
 
 * [`uniswap-v3-liquidity-math.py`](uniswap-v3-liquidity-math.py) - implementation of the equations and examples from the "Liquidity Math in Uniswap v3" paper
