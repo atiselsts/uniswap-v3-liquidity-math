@@ -44,7 +44,7 @@ Amount of ETH x=0.85 amount of USDC y=6572.89
 L=22510401004259913887
 tick=195879
 Current price: 0.000321 WETH for 1 USDC (3115.361406 USDC for 1 WETH)
-Amounts at the current tick: 3770791.99 USDC or 1209.30 WETH
+Amounts at the current tick range: 1318490.67 USDC and 785.63 WETH
 ```
 
 ### Example output of `subgraph-liquidity-range-example.py`
