@@ -45,34 +45,32 @@ tick_query = """query get_ticks($num_skip: Int, $pool_id: ID!) {
 
 
 def tick_to_price(tick):
-    return TICK_BASE ** tick
+    return TICK_BASE**tick
+
 
 # Not all ticks can be initialized. Tick spacing is determined by the pool's fee tier.
 def fee_tier_to_tick_spacing(fee_tier):
-    return {
-        500: 10,
-        3000: 60,
-        10000: 200
-    }.get(fee_tier, 60)
+    return {100: 1, 500: 10, 3000: 60, 10000: 200}.get(fee_tier, 60)
 
 
 client = Client(
     transport=RequestsHTTPTransport(
-        url='https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
+        url="https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
         verify=True,
         retries=5,
-    ))
+    )
+)
 
 # get pool info
 try:
     variables = {"pool_id": POOL_ID}
     response = client.execute(gql(pool_query), variable_values=variables)
 
-    if len(response['pools']) == 0:
+    if len(response["pools"]) == 0:
         print("pool not found")
         exit(-1)
 
-    pool = response['pools'][0]
+    pool = response["pools"][0]
     current_tick = int(pool["tick"])
     tick_spacing = fee_tier_to_tick_spacing(int(pool["feeTier"]))
 
@@ -102,7 +100,7 @@ except Exception as ex:
     print("got exception while querying tick data:", ex)
     exit(-1)
 
-    
+
 # Start from zero; if we were iterating from the current tick, would start from the pool's total liquidity
 liquidity = 0
 
@@ -149,7 +147,11 @@ while tick <= max_tick:
 
     should_print_tick = liquidity != 0
     if should_print_tick:
-        print("ticks=[{}, {}], bottom tick price={:.6f} {}".format(tick, tick + tick_spacing, adjusted_price, tokens))
+        print(
+            "ticks=[{}, {}], bottom tick price={:.6f} {}".format(
+                tick, tick + tick_spacing, adjusted_price, tokens
+            )
+        )
 
     # Compute square roots of prices corresponding to the bottom and top ticks
     bottom_tick = tick
@@ -166,28 +168,41 @@ while tick <= max_tick:
         total_amount1 += amount1
 
         if should_print_tick:
-            adjusted_amount0 = amount0 / (10 ** decimals0)
-            adjusted_amount1 = amount1 / (10 ** decimals1)
-            print("        {:.2f} {} locked, potentially worth {:.2f} {}".format(adjusted_amount1, token1, adjusted_amount0, token0))
+            adjusted_amount0 = amount0 / (10**decimals0)
+            adjusted_amount1 = amount1 / (10**decimals1)
+            print(
+                "        {:.2f} {} locked, potentially worth {:.2f} {}".format(
+                    adjusted_amount1, token1, adjusted_amount0, token0
+                )
+            )
 
     elif tick == current_range_bottom_tick:
         # Always print the current tick. It normally has both assets locked
         print("        Current tick, both assets present!")
-        print("        Current price={:.6f} {}".format(1 / adjusted_current_price if invert_price else adjusted_current_price, tokens))
+        print(
+            "        Current price={:.6f} {}".format(
+                1 / adjusted_current_price if invert_price else adjusted_current_price,
+                tokens,
+            )
+        )
 
         # Print the real amounts of the two assets needed to be swapped to move out of the current tick range
         current_sqrt_price = tick_to_price(current_tick / 2)
-        amount0actual = liquidity * (sb - current_sqrt_price) / (current_sqrt_price * sb)
+        amount0actual = (
+            liquidity * (sb - current_sqrt_price) / (current_sqrt_price * sb)
+        )
         amount1actual = liquidity * (current_sqrt_price - sa)
-        adjusted_amount0actual = amount0actual / (10 ** decimals0)
-        adjusted_amount1actual = amount1actual / (10 ** decimals1)
+        adjusted_amount0actual = amount0actual / (10**decimals0)
+        adjusted_amount1actual = amount1actual / (10**decimals1)
 
         total_amount0 += amount0actual
         total_amount1 += amount1actual
 
-        print("        {:.2f} {} and {:.2f} {} remaining in the current tick range".format(
-            adjusted_amount0actual, token0, adjusted_amount1actual, token1))
-
+        print(
+            "        {:.2f} {} and {:.2f} {} remaining in the current tick range".format(
+                adjusted_amount0actual, token0, adjusted_amount1actual, token1
+            )
+        )
 
     else:
         # Compute the amounts of tokens potentially in the range
@@ -198,11 +213,21 @@ while tick <= max_tick:
         total_amount0 += amount0
 
         if should_print_tick:
-            adjusted_amount0 = amount0 / (10 ** decimals0)
-            adjusted_amount1 = amount1 / (10 ** decimals1)
-            print("        {:.2f} {} locked, potentially worth {:.2f} {}".format(adjusted_amount0, token0, adjusted_amount1, token1))
+            adjusted_amount0 = amount0 / (10**decimals0)
+            adjusted_amount1 = amount1 / (10**decimals1)
+            print(
+                "        {:.2f} {} locked, potentially worth {:.2f} {}".format(
+                    adjusted_amount0, token0, adjusted_amount1, token1
+                )
+            )
 
     tick += tick_spacing
 
-print("In total: {:.2f} {} and {:.2f} {}".format(
-      total_amount0 / 10 ** decimals0, token0, total_amount1 / 10 ** decimals1, token1))
+print(
+    "In total: {:.2f} {} and {:.2f} {}".format(
+        total_amount0 / 10**decimals0,
+        token0,
+        total_amount1 / 10**decimals1,
+        token1,
+    )
+)
