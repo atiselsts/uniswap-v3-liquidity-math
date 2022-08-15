@@ -50,6 +50,7 @@ def tick_to_price(tick):
 # Not all ticks can be initialized. Tick spacing is determined by the pool's fee tier.
 def fee_tier_to_tick_spacing(fee_tier):
     return {
+        100: 1,
         500: 10,
         3000: 60,
         10000: 200
